@@ -1,0 +1,32 @@
+# 1. User enters the text into the text field provided
+# 2. User clicks the save button triggering a chain of events
+
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note
+# payload is sent to the server i.e. note: "string" with the above request
+note over server:
+server adds the note sent
+by the browser and redirects
+the browser to /exampleapp/notes
+causing it to fetch the notes page
+content again
+end note
+
+#from here onwards same thing happens as if one goes to /exampleapp/notes page
+server-->browser: HTML-code
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+server-->browser: main.css
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
+server-->browser: main.js
+
+note over browser:
+browser starts executing js-code
+that requests JSON data from server 
+end note
+
+browser->server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
+server-->browser: [{ content: "HTML is easy", date: "2019-05-23" }, ...]
+
+note over browser:
+browser executes the event handler
+that renders notes to display
+end note

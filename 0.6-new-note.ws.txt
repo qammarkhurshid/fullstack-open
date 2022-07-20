@@ -1,0 +1,7 @@
+browser->server:HTTP POST https://studies.cs.helsinki.fi/exampleapp/spa {"content":"crisp","date":"2022-07-20T10:42:48.171Z"}
+server-->browser: {"message":"note created"}
+note over browser
+browser prevents the default loading and 
+adds the new note to the list of existing notes
+and it begins to show up in the list
+end note
