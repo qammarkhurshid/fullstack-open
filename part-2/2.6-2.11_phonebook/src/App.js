@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Filter } from './components/Search';
 import { ContactForm } from './components/ContactForm';
 import { Numbers } from './components/Numbers';
+import axios from 'axios';
 
 const checkIfNameExists = (data, name) => data.find((d) => d.name === name);
 
@@ -10,6 +11,13 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [searchValue, setSearchValue] = useState('');
+
+  const effect = () => {
+    axios.get(`http://localhost:3001/persons`).then(({ data }) => {
+      setPersons(data);
+    });
+  };
+  useEffect(effect, []);
 
   const addContact = (event) => {
     event.preventDefault();
