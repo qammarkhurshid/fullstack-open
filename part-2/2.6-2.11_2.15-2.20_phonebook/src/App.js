@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Filter } from './components/Search';
 import { ContactForm } from './components/ContactForm';
 import { Numbers } from './components/Numbers';
+import { Notification } from './components/Notification';
 import { PhonebookServices } from './services/phonebook';
 
 const checkIfNameExists = (data, name) => data.find((d) => d.name === name);
@@ -11,6 +12,7 @@ const App = () => {
   const [newName, setNewName] = useState('');
   const [newNumber, setNewNumber] = useState('');
   const [searchValue, setSearchValue] = useState('');
+  const [notification, setNotification] = useState('');
 
   const effect = () => {
     PhonebookServices.getAll().then((data) => setPersons(data));
@@ -35,6 +37,10 @@ const App = () => {
       resp = await PhonebookServices.update(id, { ...existingPerson, number: newNumber });
     } else {
       resp = await PhonebookServices.create(newContactObj);
+      setNotification(`${newName} added successfully`);
+      setTimeout(() => {
+        setNotification('');
+      }, 5000);
     }
     setPersons([...persons, resp]);
     setNewName('');
@@ -62,8 +68,16 @@ const App = () => {
     const personToRemove = personsCopy.findIndex((el) => el.id === id);
     personsCopy.splice(personToRemove, 1);
     setPersons(personsCopy);
-
-    await PhonebookServices.deletePerson(id);
+    try {
+      await PhonebookServices.deletePerson(id);
+    } catch (error) {
+      if (error.response.status === 404) {
+        setNotification('Record has already been deleted');
+        setTimeout(() => {
+          setNotification('');
+        }, 5000);
+      }
+    }
   };
 
   const filteredPersons = () => persons.filter((p) => p.name.toLowerCase().includes(searchValue.toLowerCase()));
@@ -71,6 +85,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification} />
       <Filter searchString={searchValue} onChange={handleSearchValue} />
       <h2>Add New Contact:</h2>
       <ContactForm
