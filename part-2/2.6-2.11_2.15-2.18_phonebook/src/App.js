@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Filter } from './components/Search';
 import { ContactForm } from './components/ContactForm';
 import { Numbers } from './components/Numbers';
-import axios from 'axios';
+import { PhonebookServices } from './services/phonebook';
 
 const checkIfNameExists = (data, name) => data.find((d) => d.name === name);
 
@@ -13,18 +13,30 @@ const App = () => {
   const [searchValue, setSearchValue] = useState('');
 
   const effect = () => {
-    axios.get(`http://localhost:3001/persons`).then(({ data }) => {
-      setPersons(data);
-    });
+    PhonebookServices.getAll().then((data) => setPersons(data));
   };
-  useEffect(effect, []);
+  useEffect(effect, [newNumber]);
 
-  const addContact = (event) => {
+  const addContact = async (event) => {
     event.preventDefault();
-
-    checkIfNameExists(persons, newName)
-      ? alert(`${newName} already exists`)
-      : setPersons(persons.concat({ name: newName, number: newNumber }));
+    let resp;
+    const newContactObj = { name: newName, number: newNumber };
+    const existingPerson = checkIfNameExists(persons, newName);
+    if (existingPerson) {
+      const shouldUpdate = window.confirm(
+        `${newName} is already added to phonebook, replace the old number with a new one?`
+      );
+      if (!shouldUpdate) {
+        setNewName(newName);
+        setNewNumber(newNumber);
+        return;
+      }
+      const { id } = existingPerson;
+      resp = await PhonebookServices.update(id, { ...existingPerson, number: newNumber });
+    } else {
+      resp = await PhonebookServices.create(newContactObj);
+    }
+    setPersons([...persons, resp]);
     setNewName('');
     setNewNumber('');
   };
@@ -39,6 +51,19 @@ const App = () => {
 
   const handleSearchValue = (event) => {
     setSearchValue(event.target.value);
+  };
+
+  const handleDelete = (id) => async () => {
+    const shouldDelete = window.confirm('Do you really want to delete this contact?');
+    if (!shouldDelete) {
+      return;
+    }
+    const personsCopy = [...persons];
+    const personToRemove = personsCopy.findIndex((el) => el.id === id);
+    personsCopy.splice(personToRemove, 1);
+    setPersons(personsCopy);
+
+    await PhonebookServices.deletePerson(id);
   };
 
   const filteredPersons = () => persons.filter((p) => p.name.toLowerCase().includes(searchValue.toLowerCase()));
@@ -56,7 +81,7 @@ const App = () => {
         onNumberChange={handleNumberChange}
       />
       <h2>Numbers</h2>
-      <Numbers persons={filteredPersons()} />
+      <Numbers persons={filteredPersons()} onClick={handleDelete} />
     </div>
   );
 };
