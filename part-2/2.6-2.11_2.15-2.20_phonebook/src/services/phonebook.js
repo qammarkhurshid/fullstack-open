@@ -1,7 +1,8 @@
 import axios from 'axios';
+// const API_BASE_URL = `https://young-plateau-97943.herokuapp.com`;
 const create = async (newContactObj) => {
   try {
-    const url = `http://localhost:3001/persons`;
+    const url = `/api/persons`;
     const response = await axios.post(url, newContactObj);
     return response.data;
   } catch (error) {
@@ -10,7 +11,7 @@ const create = async (newContactObj) => {
 };
 const getAll = () => {
   return axios
-    .get(`http://localhost:3001/persons`)
+    .get(`/api/persons`)
     .then(({ data }) => {
       return data;
     })
@@ -19,11 +20,11 @@ const getAll = () => {
     });
 };
 const update = async (id, payload) => {
-  const updatedPerson = await axios.put(`http://localhost:3001/persons/${id}`, payload);
+  const updatedPerson = await axios.put(`/persons/${id}`, payload);
   return updatedPerson.data;
 };
 const deletePerson = async (id) => {
-  const deletedPerson = await axios.delete(`http://localhost:3001/persons/${id}`);
+  const deletedPerson = await axios.delete(`/api/persons/${id}`);
   return deletedPerson.status;
 };
 

@@ -80,7 +80,7 @@ const App = () => {
     }
   };
 
-  const filteredPersons = () => persons.filter((p) => p.name.toLowerCase().includes(searchValue.toLowerCase()));
+  const filteredPersons = () => persons.filter((p) => p?.name?.toLowerCase().includes(searchValue.toLowerCase()));
 
   return (
     <div>
